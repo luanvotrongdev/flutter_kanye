@@ -1,8 +1,8 @@
-import 'package:dio/dio.dart';
+import 'package:flutter_kanye/mainBloc.dart';
 import 'package:flutter/material.dart';
-//import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:rxdart/rxdart.dart';
-//import 'package:clipboard_manager/clipboard_manager.dart';
+import 'package:clipboard_manager/clipboard_manager.dart';
 
 void main() => runApp(MyApp());
 
@@ -22,6 +22,7 @@ class MyApp extends StatelessWidget {
         // or simply save your changes to "hot reload" in a Flutter IDE).
         // Notice that the counter didn't reset back to zero; the application
         // is not restarted.
+        fontFamily: 'Courier New',
         primarySwatch: Colors.blue,
       ),
       home: MyHomePage(title: 'Flutter Demo Home Page'),
@@ -49,8 +50,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final _scaffoldKey = new GlobalKey<ScaffoldState>();
-  var _dio = Dio();
-  PublishSubject _quotePublishObject = PublishSubject();
+  MainBloc _mainBloc = MainBloc();
 
   void _showSnackbar() {
     _scaffoldKey.currentState.showSnackBar(SnackBar(
@@ -58,20 +58,10 @@ class _MyHomePageState extends State<MyHomePage> {
     ));
   }
 
-  void _requestQuote() {
-    _dio.get("https://api.kanye.rest/").then((resp) {
-      if (resp.statusCode == 200) {
-        Map<String, dynamic> responseData = resp.data;
-        _quotePublishObject.add(responseData["quote"]);
-      }
-    });
-  }
-
   @override
   initState() {
     super.initState();
-    _requestQuote();
-    _quotePublishObject.startWith("fsafsd");
+    _mainBloc.requestQuote();
   }
 
   Widget _buildBody(BuildContext context) {
@@ -92,14 +82,17 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           FlatButton(
               onPressed: () async {
-//                const url = 'https://github.com/ajzbc/kanye.rest';
-//                if (await canLaunch(url)) {
-//                  await launch(url);
-//                } else {
-//                  throw 'Could not launch $url';
-//                }
+                const url = 'https://github.com/ajzbc/kanye.rest';
+                if (await canLaunch(url)) {
+                  await launch(url);
+                } else {
+                  throw 'Could not launch $url';
+                }
               },
-              child: const Text("kanye.rest")),
+              child: const Text("kanye.rest",
+              style: TextStyle(
+                fontWeight: FontWeight.bold
+              ),)),
           Container(
               padding: EdgeInsets.all(15),
               decoration: BoxDecoration(
@@ -132,13 +125,13 @@ class _MyHomePageState extends State<MyHomePage> {
                         shape: RoundedRectangleBorder(
                             borderRadius:
                                 BorderRadius.all(Radius.circular(10))),
-                        onPressed: _requestQuote,
+                        onPressed: _mainBloc.requestQuote,
                       ),
                     ],
                   ),
                   Divider(),
                   StreamBuilder(
-                    stream: _quotePublishObject,
+                    stream: _mainBloc.quotePublishObject,
                     initialData: "",
                     builder: (context, snapshot) {
                       String str = "";
