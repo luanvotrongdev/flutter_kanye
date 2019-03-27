@@ -1,10 +1,16 @@
 import 'package:flutter_kanye/mainBloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:rxdart/rxdart.dart';
-import 'package:clipboard_manager/clipboard_manager.dart';
+import 'package:flutter_kanye/QuoteWidget.dart';
 
-void main() => runApp(MyApp());
+void main()
+{
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp
+  ]);
+  return runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -50,6 +56,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final _scaffoldKey = new GlobalKey<ScaffoldState>();
+  final _quoteKey = new GlobalKey<QuoteState>();
   MainBloc _mainBloc = MainBloc();
 
   void _showSnackbar() {
@@ -61,11 +68,20 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   initState() {
     super.initState();
+    _mainBloc.quotePublishObject.listen((str){
+      if(str!=null)
+        {
+          _quoteKey.currentState.dataString = str;
+        }
+    });
     _mainBloc.requestQuote();
   }
 
   Widget _buildBody(BuildContext context) {
     Size size = MediaQuery.of(context).size;
+    const TextStyle buttonStyle = const TextStyle(
+      fontSize: 12
+    );
 
     return Center(
         // Center is a layout widget. It takes a single child and positions it
@@ -91,7 +107,8 @@ class _MyHomePageState extends State<MyHomePage> {
               },
               child: const Text("kanye.rest",
               style: TextStyle(
-                fontWeight: FontWeight.bold
+                fontWeight: FontWeight.bold,
+                fontSize: 25
               ),)),
           Container(
               padding: EdgeInsets.all(15),
@@ -105,13 +122,15 @@ class _MyHomePageState extends State<MyHomePage> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
                       OutlineButton(
-                        child: const Text("Facebook"),
+                        child: const Text("Facebook",
+                        style: buttonStyle,),
                         shape: RoundedRectangleBorder(
                             borderRadius:
                                 BorderRadius.all(Radius.circular(10))),
                       ),
                       OutlineButton(
-                        child: const Text("Copy"),
+                        child: const Text("Copy",
+                          style: buttonStyle,),
                         shape: RoundedRectangleBorder(
                             borderRadius:
                                 BorderRadius.all(Radius.circular(10))),
@@ -121,7 +140,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                 },
                       ),
                       OutlineButton(
-                        child: const Text("Refresh"),
+                        child: const Text("Refresh",
+                          style: buttonStyle,),
                         shape: RoundedRectangleBorder(
                             borderRadius:
                                 BorderRadius.all(Radius.circular(10))),
@@ -130,15 +150,16 @@ class _MyHomePageState extends State<MyHomePage> {
                     ],
                   ),
                   Divider(),
-                  StreamBuilder(
-                    stream: _mainBloc.quotePublishObject,
-                    initialData: "",
-                    builder: (context, snapshot) {
-                      String str = "";
-                      if (snapshot.data != null) str = snapshot.data;
-                      return Text('"$str"');
-                    },
-                  )
+                  Quote("",key: _quoteKey,),
+//                  StreamBuilder(
+//                    stream: _mainBloc.quotePublishObject,
+//                    initialData: "",
+//                    builder: (context, snapshot) {
+//                      String str = "";
+//                      if (snapshot.data != null) str = snapshot.data;
+//                      return Quote('"$str"');
+//                    },
+//                  )
                 ],
               ))
         ],

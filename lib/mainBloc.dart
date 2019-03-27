@@ -1,13 +1,18 @@
 import 'package:rxdart/rxdart.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/animation.dart';
 
 class MainBloc
 {
   var _dio = Dio();
   PublishSubject quotePublishObject = PublishSubject();
+  String quote = "";
 
   MainBloc()
   {
+    quotePublishObject.listen((str){
+      quote = str;
+    });
     quotePublishObject.startWith("");
   }
 
