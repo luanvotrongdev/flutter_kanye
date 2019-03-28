@@ -1,24 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 
-class QuoteState extends State<Quote> with SingleTickerProviderStateMixin {
+
+class QuoteState extends State<Quote> with TickerProviderStateMixin<Quote> {
+  AnimationController _animationController;
+  Animation<int> _animation;
+
+  String _quote;
+  String get quote =>_quote;
+  set quote(String str) {
+    void _animHandling(){
+      setState(() {
+        _dataString = _quote.substring(0, _animation.value);
+        print(_dataString);
+      });
+    }
+
+    if (_animation != null) {
+      _animation.removeListener(_animHandling);
+    }
+    _quote = str;
+    if (_quote != _dataString) {
+      _animationController.reset();
+      _animation = IntTween(begin: _dataString.length, end: _quote.length)
+          .animate(_animationController)
+        ..addListener(_animHandling);
+    if(_quote.length > _dataString.length)
+      _animationController.forward();
+    else
+      _animationController.reverse();
+    }
+
+  }
 
   String _dataString;
-  String get dataString{
-    return _dataString;
-  }
-  void set dataString(String str)
-  {
-    _dataString = str;
-    setState(() {
-      
-    });
-  }
 
   @override
   void initState() {
-    _dataString= widget.data;
-    // TODO: implement initState
+    _dataString = '';
+    _animationController =
+        AnimationController(duration: Duration(seconds: 1), vsync: this);
     super.initState();
   }
 
@@ -46,7 +67,7 @@ class QuoteState extends State<Quote> with SingleTickerProviderStateMixin {
       strutStyle: widget.strutStyle,
       text: TextSpan(
         style: effectiveTextStyle,
-        text: _dataString,
+        text: '"$_dataString "',
         children: widget.textSpan != null ? <TextSpan>[widget.textSpan] : null,
       ),
     );
@@ -64,7 +85,7 @@ class QuoteState extends State<Quote> with SingleTickerProviderStateMixin {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(StringProperty('data', widget.data, showName: false));
+    properties.add(StringProperty('data', _dataString, showName: false));
     if (widget.textSpan != null) {
       properties.add(widget.textSpan.toDiagnosticsNode(
           name: 'textSpan', style: DiagnosticsTreeStyle.transition));
@@ -100,8 +121,7 @@ class Quote extends StatefulWidget {
   /// If the [style] argument is null, the text will use the style from the
   /// closest enclosing [DefaultTextStyle].
   const Quote(
-    this.data, {
-    Key key,
+      {Key key,
     this.style,
     this.strutStyle,
     this.textAlign,
@@ -112,32 +132,9 @@ class Quote extends StatefulWidget {
     this.textScaleFactor,
     this.maxLines,
     this.semanticsLabel,
-  })  : assert(data != null),
+  })  :
         textSpan = null,
         super(key: key);
-
-  /// Creates a text widget with a [TextSpan].
-  const Quote.rich(
-    this.textSpan, {
-    Key key,
-    this.style,
-    this.strutStyle,
-    this.textAlign,
-    this.textDirection,
-    this.locale,
-    this.softWrap,
-    this.overflow,
-    this.textScaleFactor,
-    this.maxLines,
-    this.semanticsLabel,
-  })  : assert(textSpan != null),
-        data = null,
-        super(key: key);
-
-  /// The text to display.
-  ///
-  /// This will be null if a [textSpan] is provided instead.
-  final String data;
 
   /// The text to display as a [TextSpan].
   ///

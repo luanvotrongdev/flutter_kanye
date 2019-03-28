@@ -4,11 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_kanye/QuoteWidget.dart';
 
-void main()
-{
-  SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp
-  ]);
+void main() {
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   return runApp(MyApp());
 }
 
@@ -68,20 +65,16 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   initState() {
     super.initState();
-    _mainBloc.quotePublishObject.listen((str){
-      if(str!=null)
-        {
-          _quoteKey.currentState.dataString = str;
-        }
+
+    _mainBloc.quotePublishObject.listen((str) {
+      _quoteKey.currentState.quote = str;
     });
     _mainBloc.requestQuote();
   }
 
   Widget _buildBody(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    const TextStyle buttonStyle = const TextStyle(
-      fontSize: 12
-    );
+    const TextStyle buttonStyle = const TextStyle(fontSize: 12);
 
     return Center(
         // Center is a layout widget. It takes a single child and positions it
@@ -105,11 +98,10 @@ class _MyHomePageState extends State<MyHomePage> {
                   throw 'Could not launch $url';
                 }
               },
-              child: const Text("kanye.rest",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 25
-              ),)),
+              child: const Text(
+                "kanye.rest",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
+              )),
           Container(
               padding: EdgeInsets.all(15),
               decoration: BoxDecoration(
@@ -122,35 +114,45 @@ class _MyHomePageState extends State<MyHomePage> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
                       OutlineButton(
-                        child: const Text("Facebook",
-                        style: buttonStyle,),
+                        child: const Text(
+                          "Facebook",
+                          style: buttonStyle,
+                        ),
                         shape: RoundedRectangleBorder(
                             borderRadius:
                                 BorderRadius.all(Radius.circular(10))),
                       ),
                       OutlineButton(
-                        child: const Text("Copy",
-                          style: buttonStyle,),
+                        child: const Text(
+                          "Copy",
+                          style: buttonStyle,
+                        ),
                         shape: RoundedRectangleBorder(
                             borderRadius:
                                 BorderRadius.all(Radius.circular(10))),
-                                onPressed: ()
-                                {
-                                  _showSnackbar();
-                                },
+                        onPressed: () {
+                          _showSnackbar();
+                        },
                       ),
                       OutlineButton(
-                        child: const Text("Refresh",
-                          style: buttonStyle,),
+                        child: const Text(
+                          "Refresh",
+                          style: buttonStyle,
+                        ),
                         shape: RoundedRectangleBorder(
                             borderRadius:
                                 BorderRadius.all(Radius.circular(10))),
-                        onPressed: _mainBloc.requestQuote,
+                        onPressed: () {
+                          _quoteKey.currentState.quote = "";
+                          _mainBloc.requestQuote();
+                        },
                       ),
                     ],
                   ),
                   Divider(),
-                  Quote("",key: _quoteKey,),
+                  Quote(
+                    key: _quoteKey,
+                  )
 //                  StreamBuilder(
 //                    stream: _mainBloc.quotePublishObject,
 //                    initialData: "",
