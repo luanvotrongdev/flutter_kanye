@@ -1,39 +1,54 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 
+enum _QUOTE_ANIM_STATE
+{
+  FADEOUT,
+  FADEIN
+}
 
-class QuoteState extends State<Quote> with TickerProviderStateMixin<Quote> {
+class QuoteState extends State<Quote> with SingleTickerProviderStateMixin<Quote> {
   AnimationController _animationController;
   Animation<int> _animation;
 
+  _QUOTE_ANIM_STATE __quote_anim_state;
+
+  String _dataString;
   String _quote;
   String get quote =>_quote;
   set quote(String str) {
-    void _animHandling(){
-      setState(() {
-        _dataString = _quote.substring(0, _animation.value);
-        print(_dataString);
-      });
-    }
-
-    if (_animation != null) {
-      _animation.removeListener(_animHandling);
-    }
-    _quote = str;
-    if (_quote != _dataString) {
-      _animationController.reset();
+    if (_dataString.compareTo(str) != 0) {
+      if (_animation != null) {
+        _animation.removeListener(_animHandling);
+        _animationController.reset();
+      }
+      if (str.isEmpty)
+        __quote_anim_state = _QUOTE_ANIM_STATE.FADEOUT;
+      else
+        __quote_anim_state = _QUOTE_ANIM_STATE.FADEIN;
+      _quote = str;
       _animation = IntTween(begin: _dataString.length, end: _quote.length)
           .animate(_animationController)
         ..addListener(_animHandling);
-    if(_quote.length > _dataString.length)
       _animationController.forward();
-    else
-      _animationController.reverse();
+      print(_quote);
+      print(_dataString);
     }
-
   }
 
-  String _dataString;
+  void _animHandling(){
+    switch(__quote_anim_state)
+    {
+      case _QUOTE_ANIM_STATE.FADEIN:
+        _dataString = _quote.substring(0, _animation.value);
+        break;
+      case _QUOTE_ANIM_STATE.FADEOUT:
+        _dataString = _dataString.substring(0, _animation.value);
+        break;
+    }
+    setState(() {
+    });
+  }
 
   @override
   void initState() {
