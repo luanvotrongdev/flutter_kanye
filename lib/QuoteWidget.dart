@@ -1,38 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'dart:math';
 
 enum _QUOTE_ANIM_STATE
 {
   FADEOUT,
-  FADEIN
+  FADEIN,
+  HOLD,
 }
 
 class QuoteState extends State<Quote> with SingleTickerProviderStateMixin<Quote> {
+   static const int SPEED = 100; //100 chars / s
+
   AnimationController _animationController;
   Animation<int> _animation;
 
-  _QUOTE_ANIM_STATE __quote_anim_state;
+  _QUOTE_ANIM_STATE __quote_anim_state = _QUOTE_ANIM_STATE.HOLD;
+  set _quote_anim_state (_QUOTE_ANIM_STATE state)
+  {
+    __quote_anim_state = state;
+    _startAnim();
+  }
 
   String _dataString;
   String _quote;
   String get quote =>_quote;
   set quote(String str) {
-    if (_dataString.compareTo(str) != 0) {
-      if (_animation != null) {
-        _animation.removeListener(_animHandling);
-        _animationController.reset();
+    bool isStateReady = __quote_anim_state == _QUOTE_ANIM_STATE.HOLD;
+    bool isDifferentStrings = _dataString.compareTo(str) != 0;
+    if(isDifferentStrings)
+      {
+        _quote = str;
       }
+    if (isStateReady) {
       if (str.isEmpty)
-        __quote_anim_state = _QUOTE_ANIM_STATE.FADEOUT;
+        _quote_anim_state = _QUOTE_ANIM_STATE.FADEOUT;
       else
-        __quote_anim_state = _QUOTE_ANIM_STATE.FADEIN;
-      _quote = str;
-      _animation = IntTween(begin: _dataString.length, end: _quote.length)
-          .animate(_animationController)
-        ..addListener(_animHandling);
-      _animationController.forward();
-      print(_quote);
-      print(_dataString);
+        _quote_anim_state = _QUOTE_ANIM_STATE.FADEIN;
     }
   }
 
@@ -45,16 +49,40 @@ class QuoteState extends State<Quote> with SingleTickerProviderStateMixin<Quote>
       case _QUOTE_ANIM_STATE.FADEOUT:
         _dataString = _dataString.substring(0, _animation.value);
         break;
+      case _QUOTE_ANIM_STATE.HOLD:
+        break;
     }
-    setState(() {
-    });
+  }
+
+  void _animStatusUpdate(AnimationStatus status) {
+    if (status == AnimationStatus.completed) {
+      _quote_anim_state = _QUOTE_ANIM_STATE.HOLD;
+      quote = _quote; //restart animation
+    }
+  }
+
+  void _startAnim()
+  {
+    if (_animation != null) {
+      _animation.removeListener(_animHandling);
+      _animationController.reset();
+    }
+    double milliseconds = (_quote.length - _dataString.length).abs() * 1000 / SPEED;
+    _animationController.duration = Duration(milliseconds: milliseconds.ceil());
+    _animation = IntTween(begin: _dataString.length, end: _quote.length)
+        .animate(_animationController)
+      ..addListener(_animHandling);
+    _animationController.forward();
+    print(_quote);
+    print(_dataString);
   }
 
   @override
   void initState() {
     _dataString = '';
     _animationController =
-        AnimationController(duration: Duration(seconds: 1), vsync: this);
+        AnimationController(duration: Duration(seconds: 1), vsync: this)
+    ..addStatusListener(_animStatusUpdate);
     super.initState();
   }
 

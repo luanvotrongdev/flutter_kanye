@@ -2,7 +2,8 @@ import 'package:flutter_kanye/mainBloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter_kanye/QuoteWidget.dart';
+//import 'package:flutter_kanye/QuoteWidget.dart';
+import 'package:share/share.dart';
 
 void main() {
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
@@ -53,7 +54,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final _scaffoldKey = new GlobalKey<ScaffoldState>();
-  final _quoteKey = new GlobalKey<QuoteState>();
+//  final _quoteKey = new GlobalKey<QuoteState>();
+  String _quote = '""';
   MainBloc _mainBloc = MainBloc();
 
   void _showSnackbar() {
@@ -65,9 +67,11 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   initState() {
     super.initState();
+    _mainBloc.quotePublishObject.listen((str){
+      _quote = '"$str"';
+      setState(() {
 
-    _mainBloc.quotePublishObject.listen((str) {
-      _quoteKey.currentState.quote = str;
+      });
     });
     _mainBloc.requestQuote();
   }
@@ -115,12 +119,15 @@ class _MyHomePageState extends State<MyHomePage> {
                     children: <Widget>[
                       OutlineButton(
                         child: const Text(
-                          "Facebook",
+                          "Share",
                           style: buttonStyle,
                         ),
                         shape: RoundedRectangleBorder(
                             borderRadius:
                                 BorderRadius.all(Radius.circular(10))),
+                        onPressed: (){
+                          Share.share('$_quote - flutter.kanye');
+                        },
                       ),
                       OutlineButton(
                         child: const Text(
@@ -131,6 +138,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             borderRadius:
                                 BorderRadius.all(Radius.circular(10))),
                         onPressed: () {
+                          Clipboard.setData(ClipboardData(text: _quote));
                           _showSnackbar();
                         },
                       ),
@@ -143,25 +151,16 @@ class _MyHomePageState extends State<MyHomePage> {
                             borderRadius:
                                 BorderRadius.all(Radius.circular(10))),
                         onPressed: () {
-                          _quoteKey.currentState.quote = "";
                           _mainBloc.requestQuote();
                         },
                       ),
                     ],
                   ),
                   Divider(),
-                  Quote(
-                    key: _quoteKey,
-                  )
-//                  StreamBuilder(
-//                    stream: _mainBloc.quotePublishObject,
-//                    initialData: "",
-//                    builder: (context, snapshot) {
-//                      String str = "";
-//                      if (snapshot.data != null) str = snapshot.data;
-//                      return Quote('"$str"');
-//                    },
+//                  Quote(
+//                    key: _quoteKey,
 //                  )
+                  Text(_quote),
                 ],
               ))
         ],
