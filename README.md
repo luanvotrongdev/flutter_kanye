@@ -1,10 +1,12 @@
 # flutter_kanye
 
-A new Flutter application.
+My freetime-project Flutter application uses [kanye.rest](https://kanye.rest).
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+Kanye.rest resource is from [Andrew Jazbec](https://github.com/ajzbc)
+- [Github](https://github.com/ajzbc/kanye.rest)
+- [kanye.rest web demo](https://kanye.rest)
 
 A few resources to get you started if this is your first Flutter project:
 
